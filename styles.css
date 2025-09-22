@@ -1,0 +1,472 @@
+/* Custom styles for RealEstate Pro */
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Hero background with modern Moscow residential complex */
+.hero-background {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&h=1080&fit=crop&crop=center') center/cover no-repeat;
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Alternative hero background for better performance */
+.hero-background-alt {
+    background: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)), 
+                url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&h=1080&fit=crop&crop=center') center/cover no-repeat;
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Hero text styling for better readability */
+.hero-background h2,
+.hero-background-alt h2 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: 800;
+}
+
+.hero-background p,
+.hero-background-alt p {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    font-weight: 500;
+}
+
+/* Hero search bar styling */
+.hero-background .bg-white,
+.hero-background-alt .bg-white {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive hero background */
+@media (max-width: 768px) {
+    .hero-background,
+    .hero-background-alt {
+        min-height: 70vh;
+        padding: 2rem 0;
+    }
+    
+    .hero-background h2,
+    .hero-background-alt h2 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-background p,
+    .hero-background-alt p {
+        font-size: 1.1rem;
+    }
+}
+
+/* Page sections */
+.page-section {
+    min-height: 100vh;
+    padding-top: 2rem;
+}
+
+/* Navigation active state */
+.nav-link.active {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Property card hover effects */
+.property-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Favorite button animation */
+.favorite-btn {
+    transition: all 0.3s ease;
+}
+
+.favorite-btn.favorited {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Chat message animations */
+.chat-message {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modal animations */
+.modal {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive image gallery */
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.image-gallery img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.image-gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* Filter chips */
+.filter-chip {
+    display: inline-block;
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-chip.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+.filter-chip:hover {
+    background-color: #d1d5db;
+}
+
+.filter-chip.active:hover {
+    background-color: #1d4ed8;
+}
+
+/* Property status badges */
+.status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.sale {
+    background-color: #10b981;
+    color: white;
+}
+
+.status-badge.rent {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.status-badge.sold {
+    background-color: #6b7280;
+    color: white;
+}
+
+/* Map container */
+.map-container {
+    height: 400px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+}
+
+/* Search suggestions */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.search-suggestion {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.search-suggestion:hover {
+    background-color: #f9fafb;
+}
+
+.search-suggestion:last-child {
+    border-bottom: none;
+}
+
+/* Notification toast */
+.toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .search-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .property-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        background-color: #1f2937;
+        color: #f9fafb;
+    }
+    
+    .dark-mode .bg-white {
+        background-color: #374151;
+    }
+    
+    .dark-mode .text-gray-800 {
+        color: #f9fafb;
+    }
+    
+    .dark-mode .text-gray-600 {
+        color: #d1d5db;
+    }
+}
+
+/* Accessibility improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+/* Select dropdown styles */
+select {
+    color: #374151 !important;
+    background-color: white !important;
+}
+
+select option {
+    color: #374151 !important;
+    background-color: white !important;
+    padding: 8px 12px;
+}
+
+select:focus {
+    color: #374151 !important;
+    background-color: white !important;
+}
+
+/* Input styles */
+input[type="number"] {
+    color: #374151 !important;
+    background-color: white !important;
+}
+
+input[type="number"]:focus {
+    color: #374151 !important;
+    background-color: white !important;
+}
+
+/* Price range container */
+.price-range {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.price-range input {
+    flex: 1;
+}
+
+/* Floating Chat Widget */
+#chatWidget {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+#chatToggle {
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#chatToggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+#chatWindow {
+    animation: slideInUp 0.3s ease-out;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+#chatWindow.hidden {
+    animation: slideOutDown 0.3s ease-in;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+/* Chat notification badge */
+#chatToggle span {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Mobile responsiveness for chat */
+@media (max-width: 768px) {
+    #chatWindow {
+        width: calc(100vw - 2rem);
+        right: -1rem;
+        max-width: 320px;
+    }
+    
+    #chatWidget {
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .page-section {
+        page-break-inside: avoid;
+    }
+}
