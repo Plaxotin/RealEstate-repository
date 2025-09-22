@@ -159,7 +159,8 @@ const elements = {
     chatMessages: document.getElementById('chatMessages'),
     chatToggle: document.getElementById('chatToggle'),
     chatWindow: document.getElementById('chatWindow'),
-    chatClose: document.getElementById('chatClose')
+    chatClose: document.getElementById('chatClose'),
+    homeLink: document.getElementById('homeLink')
 };
 
 // Initialize app
@@ -188,6 +189,20 @@ function setupEventListeners() {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', handleNavigation);
     });
+    // Header logo/name navigates to home
+    if (elements.homeLink) {
+        elements.homeLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('home');
+            // Update active link state
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            const homeNav = Array.from(document.querySelectorAll('.nav-link')).find(a => a.getAttribute('href') === '#home');
+            if (homeNav) homeNav.classList.add('active');
+            // Hide mobile menu if open and scroll to top
+            elements.mobileMenu.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
     
     // Login modal
     elements.loginBtn.addEventListener('click', showLoginModal);
