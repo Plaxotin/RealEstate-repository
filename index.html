@@ -380,6 +380,38 @@
         </div>
     </div>
 
+    <!-- SMS Login Modal -->
+    <div id="smsLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Вход по номеру телефона</h2>
+                    <button id="closeSmsLoginModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="smsStepPhone">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Мобильный телефон</label>
+                    <div class="flex space-x-2 mb-4">
+                        <input type="tel" id="smsPhone" placeholder="+7 999 123-45-67" class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <button id="smsSendCode" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition font-bold">Получить код</button>
+                </div>
+                <div id="smsStepCode" class="hidden">
+                    <p class="text-gray-700 mb-3">Мы отправили SMS с кодом на <span id="smsPhoneDisplay" class="font-semibold"></span></p>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Код из SMS</label>
+                    <input type="text" id="smsCode" maxlength="6" placeholder="Введите код" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-4">
+                    <div class="flex space-x-2 mb-4">
+                        <button id="smsVerify" class="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition font-bold">Подтвердить</button>
+                        <button id="smsBack" class="px-4 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Назад</button>
+                    </div>
+                    <button id="smsResend" class="w-full text-blue-600 hover:text-blue-700">Отправить код повторно</button>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">Нажимая «Получить код», вы соглашаетесь с условиями обработки персональных данных и пользовательским соглашением.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
