@@ -130,6 +130,9 @@ const mockProperties = [
 
 // Global state
 let currentUser = null;
+let pendingPostAuthAction = null;
+let lastPropertyIdOpened = null;
+let currentSmsSession = { phone: null, code: null };
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let viewHistory = JSON.parse(localStorage.getItem('viewHistory')) || [];
 
@@ -160,7 +163,19 @@ const elements = {
     chatToggle: document.getElementById('chatToggle'),
     chatWindow: document.getElementById('chatWindow'),
     chatClose: document.getElementById('chatClose'),
-    homeLink: document.getElementById('homeLink')
+    homeLink: document.getElementById('homeLink'),
+    // SMS login modal elements
+    smsLoginModal: document.getElementById('smsLoginModal'),
+    closeSmsLoginModal: document.getElementById('closeSmsLoginModal'),
+    smsStepPhone: document.getElementById('smsStepPhone'),
+    smsStepCode: document.getElementById('smsStepCode'),
+    smsPhone: document.getElementById('smsPhone'),
+    smsPhoneDisplay: document.getElementById('smsPhoneDisplay'),
+    smsSendCode: document.getElementById('smsSendCode'),
+    smsVerify: document.getElementById('smsVerify'),
+    smsBack: document.getElementById('smsBack'),
+    smsResend: document.getElementById('smsResend'),
+    smsCode: document.getElementById('smsCode')
 };
 
 // Initialize app
@@ -204,10 +219,27 @@ function setupEventListeners() {
         });
     }
     
-    // Login modal
-    elements.loginBtn.addEventListener('click', showLoginModal);
+    // Login modal (legacy email) still exists but we'll favor SMS login
+    elements.loginBtn.addEventListener('click', showSmsLoginModal);
     elements.closeLoginModal.addEventListener('click', hideLoginModal);
     elements.loginForm.addEventListener('submit', handleLogin);
+
+    // SMS login modal
+    if (elements.closeSmsLoginModal) {
+        elements.closeSmsLoginModal.addEventListener('click', hideSmsLoginModal);
+    }
+    if (elements.smsSendCode) {
+        elements.smsSendCode.addEventListener('click', handleSmsSendCode);
+    }
+    if (elements.smsVerify) {
+        elements.smsVerify.addEventListener('click', handleSmsVerifyCode);
+    }
+    if (elements.smsBack) {
+        elements.smsBack.addEventListener('click', () => switchSmsStep('phone'));
+    }
+    if (elements.smsResend) {
+        elements.smsResend.addEventListener('click', resendSmsCode);
+    }
     
     // Property modal
     elements.closeModal.addEventListener('click', hidePropertyModal);
@@ -320,16 +352,121 @@ function handleLogin(e) {
 
 function updateLoginButton() {
     if (currentUser) {
+        const displayName = currentUser.name || (currentUser.phone ? maskPhone(currentUser.phone) : 'Профиль');
         elements.loginBtn.innerHTML = `
-            <i class="fas fa-user mr-2"></i>${currentUser.name}
+            <i class="fas fa-user mr-2"></i>${displayName}
         `;
-        elements.loginBtn.onclick = function() {
-            showSection('profile');
-        };
+        elements.loginBtn.onclick = function() { showSection('profile'); };
     } else {
         elements.loginBtn.innerHTML = 'Войти';
-        elements.loginBtn.onclick = showLoginModal;
+        elements.loginBtn.onclick = showSmsLoginModal;
     }
+}
+
+// SMS auth helpers and handlers
+function showSmsLoginModal() {
+    if (!elements.smsLoginModal) return;
+    switchSmsStep('phone');
+    elements.smsLoginModal.classList.remove('hidden');
+}
+
+function hideSmsLoginModal() {
+    if (!elements.smsLoginModal) return;
+    elements.smsLoginModal.classList.add('hidden');
+}
+
+function switchSmsStep(step) {
+    if (!elements.smsStepPhone || !elements.smsStepCode) return;
+    if (step === 'phone') {
+        elements.smsStepPhone.classList.remove('hidden');
+        elements.smsStepCode.classList.add('hidden');
+        if (elements.smsPhone) elements.smsPhone.focus();
+    } else {
+        elements.smsStepPhone.classList.add('hidden');
+        elements.smsStepCode.classList.remove('hidden');
+        if (elements.smsCode) elements.smsCode.focus();
+    }
+}
+
+function normalizePhone(phone) {
+    return (phone || '').replace(/[^\d+]/g, '');
+}
+
+function maskPhone(phone) {
+    const p = normalizePhone(phone);
+    if (p.length < 6) return phone;
+    return p.replace(/(\+?\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/, (m, c, a, b, d, e) => `${c} ${a[0]}${a[1]}${a[2]} ${b[0]}**-**-**`);
+}
+
+function isPhoneAuthenticated() {
+    return Boolean(currentUser && currentUser.phone);
+}
+
+function requirePhoneAuth(action) {
+    if (isPhoneAuthenticated()) {
+        action && action();
+        return true;
+    }
+    pendingPostAuthAction = action;
+    showSmsLoginModal();
+    return false;
+}
+
+function handleSmsSendCode() {
+    const phoneInput = elements.smsPhone ? elements.smsPhone.value.trim() : '';
+    const phone = normalizePhone(phoneInput);
+    if (!phone || phone.length < 10) {
+        showToast('Введите корректный номер телефона', 'error');
+        return;
+    }
+    // Simulate sending SMS by generating a code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    currentSmsSession = { phone, code };
+    if (elements.smsPhoneDisplay) elements.smsPhoneDisplay.textContent = maskPhone(phone);
+    switchSmsStep('code');
+    showToast('Код отправлен по СМС', 'success');
+    console.log('SMS code (dev):', code);
+}
+
+function handleSmsVerifyCode() {
+    const inputCode = elements.smsCode ? elements.smsCode.value.trim() : '';
+    if (!currentSmsSession.code || !currentSmsSession.phone) {
+        showToast('Сначала запросите код', 'error');
+        return;
+    }
+    if (inputCode !== currentSmsSession.code) {
+        showToast('Неверный код. Попробуйте ещё раз', 'error');
+        return;
+    }
+    // Mark authenticated
+    currentUser = {
+        id: Date.now(),
+        name: currentUser && currentUser.name ? currentUser.name : 'Пользователь',
+        phone: currentSmsSession.phone
+    };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    updateLoginButton();
+    hideSmsLoginModal();
+    showToast('Телефон подтверждён', 'success');
+    // Continue pending action or refresh modal content
+    if (typeof pendingPostAuthAction === 'function') {
+        const action = pendingPostAuthAction;
+        pendingPostAuthAction = null;
+        try { action(); } catch (e) { console.error(e); }
+    } else if (lastPropertyIdOpened) {
+        showPropertyDetails(lastPropertyIdOpened);
+    }
+}
+
+function resendSmsCode() {
+    if (!currentSmsSession.phone) {
+        switchSmsStep('phone');
+        return;
+    }
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    currentSmsSession.code = code;
+    showToast('Код отправлён повторно', 'info');
+    console.log('SMS code (dev, resend):', code);
 }
 
 function loadFeaturedProperties() {
@@ -370,7 +507,7 @@ function createPropertyCard(property) {
                             class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
                         Подробнее
                     </button>
-                    <button onclick="contactAgent(${property.id})" 
+                    <button onclick="requirePhoneAuth(() => contactAgent(${property.id}))" 
                             class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
                         <i class="fas fa-phone"></i>
                     </button>
@@ -383,6 +520,7 @@ function createPropertyCard(property) {
 function showPropertyDetails(propertyId) {
     const property = mockProperties.find(p => p.id === propertyId);
     if (!property) return;
+    lastPropertyIdOpened = propertyId;
     
     // Add to view history
     if (!viewHistory.find(h => h.id === propertyId)) {
@@ -449,13 +587,19 @@ function showPropertyDetails(propertyId) {
                         </div>
                         <div>
                             <p class="font-bold">${property.agent.name}</p>
-                            <p class="text-sm text-gray-600">${property.agent.phone}</p>
+                            ${isPhoneAuthenticated() ? `
+                                <p class=\"text-sm text-gray-700\">${property.agent.phone}</p>
+                                <p class=\"text-sm text-gray-500\">${property.agent.email}</p>
+                            ` : `
+                                <p class=\"text-sm text-gray-500\">Контакты доступны после входа по СМС</p>
+                                <button onclick=\"requirePhoneAuth(() => showPropertyDetails(${property.id}))\" class=\"mt-2 text-blue-600 hover:text-blue-700\">Показать контакты</button>
+                            `}
                         </div>
                     </div>
                 </div>
                 
                 <div class="space-y-3">
-                    <button onclick="contactAgent(${property.id})" 
+                    <button onclick="requirePhoneAuth(() => contactAgent(${property.id}))" 
                             class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-bold">
                         <i class="fas fa-phone mr-2"></i>Связаться с агентом
                     </button>
@@ -522,6 +666,12 @@ function contactAgent(propertyId) {
     const property = mockProperties.find(p => p.id === propertyId);
     if (!property) return;
     
+    // Ensure phone auth before contacting (this function may be wrapped by requirePhoneAuth already)
+    if (!isPhoneAuthenticated()) {
+        requirePhoneAuth(() => contactAgent(propertyId));
+        return;
+    }
+
     showToast(`Связываемся с агентом ${property.agent.name}...`, 'info');
     
     // Simulate phone call or redirect to chat
@@ -876,13 +1026,16 @@ function addPropertyToMap(property) {
                     <p><strong>Площадь:</strong> ${property.area} м²</p>
                     <p><strong>Комнат:</strong> ${property.rooms}</p>
                     <p><strong>Агент:</strong> ${property.agent.name}</p>
-                    <p><strong>Телефон:</strong> ${property.agent.phone}</p>
+                    ${isPhoneAuthenticated() ? 
+                        `<p><strong>Телефон:</strong> ${property.agent.phone}</p>` : 
+                        `<p><strong>Телефон:</strong> <span style="filter: blur(5px);">${property.agent.phone}</span></p>
+                         <button onclick=\"requirePhoneAuth(() => showPropertyDetails(${property.id}))\" style=\"margin-top:8px;color:#2563eb;\">Показать контакты</button>`}
                     <div style="margin-top: 10px;">
                         <button onclick="showPropertyDetails(${property.id})" 
                                 style="background: #2563eb; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
                             Подробнее
                         </button>
-                        <button onclick="contactAgent(${property.id})" 
+                        <button onclick="requirePhoneAuth(() => contactAgent(${property.id}))" 
                                 style="background: #10b981; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">
                             Связаться
                         </button>

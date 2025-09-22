@@ -160,6 +160,11 @@ html {
     transform: scale(1.05);
 }
 
+/* Masked/blurred contact info */
+.blurred {
+    filter: blur(5px);
+}
+
 /* Filter chips */
 .filter-chip {
     display: inline-block;
